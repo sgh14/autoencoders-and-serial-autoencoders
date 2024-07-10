@@ -20,12 +20,10 @@ class Autoencoder:
         """
         # Set up the encoder
         self.encoder = encoder
-        self.encoder.name = 'encoder'
         self.encoder.summary()
         
         # Set up the decoder
         self.decoder = decoder
-        self.decoder.name = 'decoder'
         self.decoder.summary()
 
         # Construct the full autoencoder by combining encoder and decoder
