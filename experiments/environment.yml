@@ -1,8 +1,8 @@
 name: ae
 dependencies:
-  - python
-  - numpy
-  - matplotlib
-  - scikit-learn
+  - python == 3.10.12
+  - numpy == 1.26.4
+  - matplotlib == 3.7.1
   - pip:
-    - tensorflow
+    - tensorflow == 2.17.0
+    - scikit-learn == 1.3.2
