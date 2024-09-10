@@ -30,7 +30,7 @@ class Autoencoder:
 
         # Construct the full autoencoder by combining encoder and decoder
         self.autoencoder = Sequential([
-            Input(shape=encoder.layers[0].input_shape[1:]),  # Input layer matching encoder's input shape
+            Input(shape=encoder.input_shape[1:]),  # Input layer matching encoder's input shape
             self.encoder,
             self.decoder
         ], name='autoencoder')
