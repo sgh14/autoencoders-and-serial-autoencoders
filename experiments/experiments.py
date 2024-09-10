@@ -38,5 +38,5 @@ fig, ax = plot_original(*datasets_train_rec, 'experiments/results/swiss_roll/AE/
 fig, axes = plot_projection(*datasets_test_red, 'experiments/results/swiss_roll/AE/test_red')
 fig, axes = plot_original(*datasets_test_rec, 'experiments/results/swiss_roll/AE/test_rec')
 
-for i, name in ('clean-few', 'clean-many', 'noisy-few', 'noisy-many'):
+for name in ('clean-few', 'clean-many', 'noisy-few', 'noisy-many'):
     plot_history(history, 'experiments/results/swiss_roll/AE/histories/' + name)
