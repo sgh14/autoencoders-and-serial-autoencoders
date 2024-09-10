@@ -1,0 +1,8 @@
+name: ae
+dependencies:
+  - python
+  - numpy
+  - matplotlib
+  - scikit-learn
+  - pip:
+    - tensorflow
