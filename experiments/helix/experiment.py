@@ -1,14 +1,14 @@
 from Autoencoder import Autoencoder
-from experiments.plot_results import plot_original, plot_projection, plot_history
-from experiments.load_data import get_datasets
+from experiments.helix.plot_results import plot_original, plot_projection, plot_history
+from experiments.helix.load_data import get_datasets
 from experiments.utils import build_encoder, build_decoder
 
 
 datasets_train, datasets_test = get_datasets(npoints=2000, test_size=0.5, seed=123, noise=0.5)
 
 # Plot datasets
-fig, axes = plot_original(*datasets_train, 'experiments/results/swiss_roll/original/training')
-fig, axes = plot_original(*datasets_test, 'experiments/results/swiss_roll/original/test')
+fig, axes = plot_original(*datasets_train, 'experiments/helix/results/train_orig')
+fig, axes = plot_original(*datasets_test, 'experiments/helix/results/test_orig')
 
 datasets_train_red = []
 datasets_test_red = []
@@ -33,10 +33,10 @@ for (X_train, y_train), (X_test, y_test) in zip(datasets_train, datasets_test):
     datasets_train_rec.append((X_train_rec, y_train))
     datasets_test_rec.append((X_test_rec, y_test))
 
-fig, ax = plot_projection(*datasets_train_red, 'experiments/results/swiss_roll/AE/train_red')
-fig, ax = plot_original(*datasets_train_rec, 'experiments/results/swiss_roll/AE/train_rec')
-fig, axes = plot_projection(*datasets_test_red, 'experiments/results/swiss_roll/AE/test_red')
-fig, axes = plot_original(*datasets_test_rec, 'experiments/results/swiss_roll/AE/test_rec')
+fig, ax = plot_projection(*datasets_train_red, 'experiments/helix/results/train_red')
+fig, ax = plot_original(*datasets_train_rec, 'experiments/helix/results/train_rec')
+fig, axes = plot_projection(*datasets_test_red, 'experiments/helix/results/test_red')
+fig, axes = plot_original(*datasets_test_rec, 'experiments/helix/results/test_rec')
 
 for name in ('clean-few', 'clean-many', 'noisy-few', 'noisy-many'):
-    plot_history(history, 'experiments/results/swiss_roll/AE/histories/' + name, log_scale=True)
+    plot_history(history, 'experiments/helix/results/histories/' + name, log_scale=True)

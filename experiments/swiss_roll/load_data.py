@@ -2,7 +2,7 @@ import numpy as np
 from sklearn.datasets import make_swiss_roll
 from sklearn.model_selection import train_test_split
 
-from experiments.plot_results import my_colormap2D
+from experiments.swiss_roll.plot_results import my_colormap2D
 
 
 def normalize(x):

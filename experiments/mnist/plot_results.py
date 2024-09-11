@@ -1,0 +1,214 @@
+import os
+import numpy as np
+import matplotlib as mpl
+from matplotlib import pyplot as plt
+
+# Define custom style
+plt.style.use('default')  # Reset to default style
+mpl.rcParams.update({
+    # Use serif fonts
+    'font.family': 'serif',
+    'font.serif': ['Times New Roman'],  # Specify a specific serif font
+    'font.size': 15,
+    'axes.titlesize': 'medium',
+    'axes.labelsize': 'medium',
+    'mathtext.fontset': 'dejavuserif',
+
+    # Use LaTeX for math formatting
+    'text.usetex': True,
+    'text.latex.preamble': r'\usepackage{amsmath} \usepackage{amssymb}',
+})
+
+
+# Function to sample 2 images per class from the dataset
+def sample_images_per_class(X, y, num_classes=6, images_per_class=2):
+    selected_images = []
+    selected_labels = []
+    
+    for class_label in range(num_classes):
+        class_indices = np.where(y == class_label)[0]
+        selected_indices = class_indices[:images_per_class]
+        selected_images.extend(X[selected_indices])
+        selected_labels.extend(y[selected_indices])
+    
+    return np.array(selected_images), np.array(selected_labels)
+
+
+def plot_images(axes, X, y):
+    for i, ax in enumerate(axes.ravel()):
+        ax.imshow(X[i], cmap='gray')
+        ax.set_title(y[i])
+        ax.axis('off')
+    
+    return axes
+
+
+def plot_grids(
+    subfigs,
+    datasets,
+    titles,
+    output_dir,
+    num_classes=6,
+    images_per_class=2,
+    grid_shape=(3, 4),
+    figsize=(3, 3)
+):
+    os.makedirs(output_dir, exist_ok=True)
+    
+    for subfig, (X, y), title in zip(subfigs, datasets, titles):
+        X, y = sample_images_per_class(X, y, num_classes, images_per_class)
+        axes = subfig.subplots(grid_shape[0], grid_shape[1])
+        subfig.suptitle(title)
+        axes = plot_images(axes, X, y)
+
+        fig_single, axes_single = plt.subplots(
+            grid_shape[0], grid_shape[1], figsize=figsize
+        )
+        axes_single = plot_images(axes_single, X, y)
+
+        for format in ('.pdf', '.png', '.svg'):
+                fig_single.savefig(os.path.join(output_dir, title + format))
+
+        plt.close(fig_single)
+    
+    return subfigs
+
+
+def plot_original(
+    dataset_small,
+    dataset,
+    dataset_noisy_small,
+    dataset_noisy,
+    output_dir,
+    num_classes=6,
+    images_per_class=2,
+    grid_shape=(3, 4)
+):
+    datasets = [dataset_small, dataset_noisy_small]
+    titles = ['Samples without noise', 'Samples with noise']
+    figsize = (6, 3)
+    # Create a main figure
+    fig = plt.figure(figsize=figsize)
+    # Create two subfigures for clean and noisy images
+    subfigs = fig.subfigures(2, 1, hspace=0.3)
+    subfigs = plot_grids(
+        subfigs,
+        datasets,
+        titles,
+        output_dir,
+        num_classes,
+        images_per_class,
+        grid_shape,
+        (figsize[0]/2, figsize[1])
+    )
+    
+    fig.tight_layout()
+    for format in ('.pdf', '.png', '.svg'):
+        fig.savefig(os.path.join(output_dir, 'global' + format))
+
+
+def plot_reconstruction(
+    dataset_small,
+    dataset,
+    dataset_noisy_small,
+    dataset_noisy,
+    output_dir,
+    num_classes=6,
+    images_per_class=2,
+    grid_shape=(3, 4)
+):
+    datasets = [dataset_small, dataset, dataset_noisy_small, dataset_noisy]
+    titles = [
+        'Few samples without noise',
+        'Many samples without noise',
+        'Few samples with noise',
+        'Many samples with noise'
+    ]
+    figsize = (6, 6)
+    # Create a main figure
+    fig = plt.figure(figsize=figsize)
+    # Create two subfigures for clean and noisy images
+    subfigs = fig.subfigures(2, 1, hspace=0.3)
+    subfigs = plot_grids(
+        subfigs,
+        datasets,
+        titles,
+        output_dir,
+        num_classes,
+        images_per_class,
+        grid_shape,
+        (figsize[0]/2, figsize[1]/2)
+    )
+
+    fig.tight_layout()
+    for format in ('.pdf', '.png', '.svg'):
+        fig.savefig(os.path.join(output_dir, 'global' + format))
+
+
+def plot_projection(dataset_small, dataset, dataset_noisy_small, dataset_noisy, output_dir):
+    os.makedirs(output_dir, exist_ok=True)
+
+    figsize = (6, 6)
+    fig, axes = plt.subplots(2, 2, figsize=figsize)
+
+    datasets = [dataset_small, dataset, dataset_noisy_small, dataset_noisy]
+    titles = [
+        'Few samples without noise',
+        'Many samples without noise',
+        'Few samples with noise',
+        'Many samples with noise'
+    ]
+
+    for ax, (X, y), title in zip(axes.flatten(), datasets, titles):
+        ax.scatter(X[:, 0], X[:, 1], c=y, cmap='Spectral')
+        # ax.ticklabel_format(axis='both', style='sci', scilimits=(-2, 2), useMathText=True)
+        ax.set_title(title)
+
+        # Create a new figure for each subplot
+        fig_single, ax_single = plt.subplots(figsize=(figsize[0]/2, figsize[1]/2))
+        ax_single.scatter(X[:, 0], X[:, 1], c=y, cmap='Spectral')
+        ax_single.set_aspect('equal')
+        ax_single.set_xlabel(r'$\Tilde{x}$')
+        ax_single.set_ylabel(r'$\Tilde{y}$')
+        fig_single.tight_layout()
+
+        for format in ('.pdf', '.png', '.svg'):
+            fig_single.savefig(os.path.join(output_dir, title + format))
+
+        plt.close(fig_single)
+
+    axes[1, 0].set_xlabel(r'$\Tilde{x}$')
+    axes[1, 1].set_xlabel(r'$\Tilde{x}$')
+    axes[0, 0].set_ylabel(r'$\Tilde{y}$')
+    axes[1, 0].set_ylabel(r'$\Tilde{y}$')
+    # Set all axes to be square
+    for ax in axes.flatten():
+        ax.set_aspect('equal')
+
+    fig.tight_layout()
+    for format in ('pdf', 'png', 'svg'):
+        fig.savefig(os.path.join(output_dir, 'global.' + format))
+
+
+    return fig, axes
+
+
+def plot_history(history, output_dir, log_scale=False):
+    os.makedirs(output_dir, exist_ok=True)
+
+    h = history.history
+    keys = [key for key in h.keys() if not key.startswith('val_')]
+    for key in keys:
+        y = np.array([h[key], h['val_' + key]])
+        fig, ax = plt.subplots()
+        if log_scale:
+            ax.semilogy(y[0], label='Training')
+            ax.semilogy(y[1], label='Validation')
+        else:
+            ax.plot(y[0], label='Training')
+            ax.plot(y[1], label='Validation')
+
+        ax.set_ylabel(key)
+        ax.set_xlabel('Epoch')
+        ax.legend()
+        fig.savefig(os.path.join(output_dir, key + '.png'))

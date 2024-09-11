@@ -20,15 +20,6 @@ mpl.rcParams.update({
 })
 
 
-def my_colormap1D(x):
-    c1=(0.75, 0, 0.75)
-    c2=(0, 0.75, 0.75)
-    # Calculate the RGB values based on interpolation
-    color = np.array(c1) * (1 - x) + np.array(c2) * x
-
-    return color
-
-
 def my_colormap2D(x, y):
     # Define colors in RGB
     bottom_left = (0.5, 0, 0.5) # dark magenta
