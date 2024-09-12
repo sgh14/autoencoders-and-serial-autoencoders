@@ -19,6 +19,7 @@ def get_data(npoints=2000, test_size=0.5, seed=123, noise=0.5, n_classes=6):
     indices = np.arange(X.shape[0])
     np.random.shuffle(indices)
     X = X[indices]
+    y = y[indices]
     # Add white noise
     X = X + np.random.normal(loc=0.0, scale=noise, size=X.shape)
     # Clip the pixel values in the [0, 1] interval

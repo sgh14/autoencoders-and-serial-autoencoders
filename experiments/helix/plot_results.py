@@ -68,14 +68,9 @@ def plot_original(dataset_small, dataset, dataset_noisy_small, dataset_noisy, ou
         for format in ('.pdf', '.png', '.svg'):
             fig_single.savefig(os.path.join(output_dir, title + format))
 
-        plt.close(fig_single)
-
     fig.tight_layout()
     for format in ('.pdf', '.png', '.svg'):
         fig.savefig(os.path.join(output_dir, 'global' + format))
-
-
-    return fig, axes
 
 
 def plot_projection(dataset_small, dataset, dataset_noisy_small, dataset_noisy, output_dir):
@@ -108,8 +103,6 @@ def plot_projection(dataset_small, dataset, dataset_noisy_small, dataset_noisy, 
         for format in ('.pdf', '.png', '.svg'):
             fig_single.savefig(os.path.join(output_dir, title + format))
 
-        plt.close(fig_single)
-
     axes[1, 0].set_xlabel(r'$\Tilde{x}$')
     axes[1, 1].set_xlabel(r'$\Tilde{x}$')
     axes[0, 0].set_ylabel(r'$\Tilde{y}$')
@@ -121,9 +114,6 @@ def plot_projection(dataset_small, dataset, dataset_noisy_small, dataset_noisy, 
     fig.tight_layout()
     for format in ('pdf', 'png', 'svg'):
         fig.savefig(os.path.join(output_dir, 'global.' + format))
-
-
-    return fig, axes
 
 
 def plot_history(history, output_dir, log_scale=False):

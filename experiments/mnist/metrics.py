@@ -1,8 +1,10 @@
-
+import os
 import numpy as np
-from sklearn import metrics
+import pandas as pd
 from sklearn.cluster import KMeans
-from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import confusion_matrix
+from scipy.optimize import linear_sum_assignment
+
 '''
 Purity measures the frequency of data belonging to the same cluster sharing the
 same class label, while Accuracy measures the frequency of data from the same
@@ -13,11 +15,11 @@ def purity_score(y_true, y_pred):
     # Compute confusion matrix
     matrix = confusion_matrix(y_true, y_pred)
 
-    # Find the maximum values in each column (which represents clusters)
-    max_in_cols = np.amax(matrix, axis=0)
+    # Find the maximum values in each row (each class)
+    max_in_rows = np.amax(matrix, axis=1)
 
     # Sum the maximum values found
-    purity = np.sum(max_in_cols) / np.sum(matrix)
+    purity = np.sum(max_in_rows) / np.sum(matrix)
 
     return purity
 
@@ -35,33 +37,32 @@ def clustering_accuracy(y_true, y_pred):
     return accuracy
 
 
-def compute_metrics(X_red, X, Y, n_classes):
-    """
-    Función para calcular la pureza y el índice de Rand de los clusters de K-Means
-    sobre los datos reducidos y, también, el accuracy de las clasificación de KNN
-    con 1 vecino de los datos reducidos.
-    """
-    # Inicializamos la clase de K-Means con n_classes clusters
-    k_means = KMeans(n_clusters=n_classes)
-    # Ajustamos K-Means a los datos reducidos
-    clusters = k_means.fit_predict(X_red)
-    # Calculamos la pureza de los clusters resultantes
-    clusters_purity = purity_score(Y, clusters)
-    # Calculamos el índice de Rand de los clusters resultantes
-    clusters_rand_index = metrics.cluster.rand_score(Y, clusters)
+def compute_metrics(
+    dataset_small,
+    dataset,
+    dataset_noisy_small,
+    dataset_noisy,
+    output_dir,
+    n_classes
+):
+    datasets = [dataset_small, dataset, dataset_noisy_small, dataset_noisy]
+    titles = ['few-clean', 'many-clean', 'few-noisy', 'many-noisy']
+    results = {'title': [], 'purity': [], 'accuracy': []}
+    
+    for title, (X_red, y) in zip(titles, datasets):
+        # Initialize K-Means with n_classes clusters
+        k_means = KMeans(n_clusters=n_classes)
+        # Fit K-Means to the reduced data
+        clusters = k_means.fit_predict(X_red)
+        # Calculate the purity of the resulting clusters
+        clusters_purity = purity_score(y, clusters)
+        # Calculate the accuracy of the resulting clusters
+        clusters_accuracy = clustering_accuracy(y, clusters)
 
-    # Inicializamos la clase de KNN con 1 vecino
-    knn = KNeighborsClassifier(n_neighbors=1)
-    # Definimos la cantidad de datos para entrenamiento y para validación
-    fraction = (70*(X_red.shape[0]))//100
-    # Dividimos los datos en un conjunto de entrenamiento y otro de validación
-    X_red_train, X_red_test = np.split(X_red, [fraction])
-    Y_train, Y_test = np.split(Y, [fraction])
-    # Ajustamos KNN a los datos reducidos
-    knn = knn.fit(X_red_train, Y_train)
-    # Realizamos las predicciones sobre el cojunto de validación
-    Y_pred = knn.predict(X_red_test)
-    # Calculamos el accuracy de las predicciones
-    classification_accuracy = metrics.accuracy_score(Y_test, Y_pred)
-
-    return clusters_purity, clusters_rand_index, classification_accuracy
+        results['title'].append(title)
+        results['purity'].append(clusters_purity)
+        results['accuracy'].append(clusters_accuracy)
+    
+    # Save the results to a .txt file
+    df = pd.DataFrame(results)
+    df.to_csv(os.path.join(output_dir, 'metrics.txt'), sep='\t', index=False)

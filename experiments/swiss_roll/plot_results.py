@@ -73,14 +73,9 @@ def plot_original(dataset_small, dataset, dataset_noisy_small, dataset_noisy, ou
         for format in ('.pdf', '.png', '.svg'):
             fig_single.savefig(os.path.join(output_dir, title + format))
 
-        plt.close(fig_single)
-
     fig.tight_layout()
     for format in ('.pdf', '.png', '.svg'):
         fig.savefig(os.path.join(output_dir, 'global' + format))
-
-
-    return fig, axes
 
 
 def plot_projection(dataset_small, dataset, dataset_noisy_small, dataset_noisy, output_dir):
@@ -113,8 +108,6 @@ def plot_projection(dataset_small, dataset, dataset_noisy_small, dataset_noisy, 
         for format in ('.pdf', '.png', '.svg'):
             fig_single.savefig(os.path.join(output_dir, title + format))
 
-        plt.close(fig_single)
-
     axes[1, 0].set_xlabel(r'$\Tilde{x}$')
     axes[1, 1].set_xlabel(r'$\Tilde{x}$')
     axes[0, 0].set_ylabel(r'$\Tilde{y}$')
@@ -126,9 +119,6 @@ def plot_projection(dataset_small, dataset, dataset_noisy_small, dataset_noisy, 
     fig.tight_layout()
     for format in ('pdf', 'png', 'svg'):
         fig.savefig(os.path.join(output_dir, 'global.' + format))
-
-
-    return fig, axes
 
 
 def plot_history(history, output_dir, log_scale=False):
@@ -150,14 +140,3 @@ def plot_history(history, output_dir, log_scale=False):
         ax.set_xlabel('Epoch')
         ax.legend()
         fig.savefig(os.path.join(output_dir, key + '.png'))
-
-
-# def plot_results(X_red, y, output_dir, cmap=plt.get_cmap('Set1')):
-#     n_components = X_red.shape[1]
-#     for i in range(n_components-1):
-#         fig, ax = plt.subplots()
-#         ax.scatter(X_red[:, i], X_red[:, i+1], c=cmap(y))
-
-#         ax.set_xlabel(f'Feature {i+1}')
-#         ax.set_ylabel(f'Feature {i+2}')
-#         fig.savefig(os.path.join(output_dir, f'X_red_{i+1}-{i+2}.png'))

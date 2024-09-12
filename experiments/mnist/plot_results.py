@@ -21,11 +21,11 @@ mpl.rcParams.update({
 
 
 # Function to sample 2 images per class from the dataset
-def sample_images_per_class(X, y, num_classes=6, images_per_class=2):
+def sample_images_per_class(X, y, n_classes=6, images_per_class=2):
     selected_images = []
     selected_labels = []
     
-    for class_label in range(num_classes):
+    for class_label in range(n_classes):
         class_indices = np.where(y == class_label)[0]
         selected_indices = class_indices[:images_per_class]
         selected_images.extend(X[selected_indices])
@@ -34,10 +34,12 @@ def sample_images_per_class(X, y, num_classes=6, images_per_class=2):
     return np.array(selected_images), np.array(selected_labels)
 
 
-def plot_images(axes, X, y):
+def plot_images(axes, X, y=[]):
     for i, ax in enumerate(axes.ravel()):
         ax.imshow(X[i], cmap='gray')
-        ax.set_title(y[i])
+        if len(y) > 0:
+            ax.set_title(y[i])
+
         ax.axis('off')
     
     return axes
@@ -48,7 +50,7 @@ def plot_grids(
     datasets,
     titles,
     output_dir,
-    num_classes=6,
+    n_classes=6,
     images_per_class=2,
     grid_shape=(3, 4),
     figsize=(3, 3)
@@ -56,8 +58,8 @@ def plot_grids(
     os.makedirs(output_dir, exist_ok=True)
     
     for subfig, (X, y), title in zip(subfigs, datasets, titles):
-        X, y = sample_images_per_class(X, y, num_classes, images_per_class)
-        axes = subfig.subplots(grid_shape[0], grid_shape[1])
+        X, y = sample_images_per_class(X, y, n_classes, images_per_class)
+        axes = subfig.subplots(grid_shape[0], grid_shape[1], gridspec_kw={'wspace': 0, 'hspace': 0})
         subfig.suptitle(title)
         axes = plot_images(axes, X, y)
 
@@ -66,99 +68,79 @@ def plot_grids(
         )
         axes_single = plot_images(axes_single, X, y)
 
+        fig_single.tight_layout()
         for format in ('.pdf', '.png', '.svg'):
                 fig_single.savefig(os.path.join(output_dir, title + format))
 
-        plt.close(fig_single)
     
     return subfigs
 
 
 def plot_original(
-    dataset_small,
-    dataset,
-    dataset_noisy_small,
-    dataset_noisy,
+    datasets,
+    titles,
     output_dir,
-    num_classes=6,
+    n_classes=6,
     images_per_class=2,
     grid_shape=(3, 4)
 ):
-    datasets = [dataset_small, dataset_noisy_small]
-    titles = ['Samples without noise', 'Samples with noise']
-    figsize = (6, 3)
+    os.makedirs(output_dir, exist_ok=True)
+    figsize = (3, 6)
     # Create a main figure
-    fig = plt.figure(figsize=figsize)
+    fig = plt.figure(constrained_layout=True, figsize=figsize)
     # Create two subfigures for clean and noisy images
-    subfigs = fig.subfigures(2, 1, hspace=0.3)
+    subfigs = fig.subfigures(2, 1, hspace=0.1, wspace=0)
     subfigs = plot_grids(
         subfigs,
         datasets,
         titles,
         output_dir,
-        num_classes,
+        n_classes,
         images_per_class,
         grid_shape,
-        (figsize[0]/2, figsize[1])
+        (figsize[0], figsize[1]/2)
     )
     
-    fig.tight_layout()
+    # fig.tight_layout()
     for format in ('.pdf', '.png', '.svg'):
         fig.savefig(os.path.join(output_dir, 'global' + format))
 
 
 def plot_reconstruction(
-    dataset_small,
-    dataset,
-    dataset_noisy_small,
-    dataset_noisy,
+    datasets,
+    titles,
     output_dir,
-    num_classes=6,
+    n_classes=6,
     images_per_class=2,
     grid_shape=(3, 4)
 ):
-    datasets = [dataset_small, dataset, dataset_noisy_small, dataset_noisy]
-    titles = [
-        'Few samples without noise',
-        'Many samples without noise',
-        'Few samples with noise',
-        'Many samples with noise'
-    ]
+    os.makedirs(output_dir, exist_ok=True)
     figsize = (6, 6)
     # Create a main figure
-    fig = plt.figure(figsize=figsize)
+    fig = plt.figure(constrained_layout=True, figsize=figsize)
     # Create two subfigures for clean and noisy images
-    subfigs = fig.subfigures(2, 1, hspace=0.3)
+    subfigs = fig.subfigures(2, 2, hspace=0.1, wspace=0)
     subfigs = plot_grids(
         subfigs,
         datasets,
         titles,
         output_dir,
-        num_classes,
+        n_classes,
         images_per_class,
         grid_shape,
         (figsize[0]/2, figsize[1]/2)
     )
 
-    fig.tight_layout()
+    # fig.tight_layout()
     for format in ('.pdf', '.png', '.svg'):
         fig.savefig(os.path.join(output_dir, 'global' + format))
 
 
-def plot_projection(dataset_small, dataset, dataset_noisy_small, dataset_noisy, output_dir):
+def plot_projection(datasets, titles, output_dir):
     os.makedirs(output_dir, exist_ok=True)
 
     figsize = (6, 6)
     fig, axes = plt.subplots(2, 2, figsize=figsize)
-
-    datasets = [dataset_small, dataset, dataset_noisy_small, dataset_noisy]
-    titles = [
-        'Few samples without noise',
-        'Many samples without noise',
-        'Few samples with noise',
-        'Many samples with noise'
-    ]
-
     for ax, (X, y), title in zip(axes.flatten(), datasets, titles):
         ax.scatter(X[:, 0], X[:, 1], c=y, cmap='Spectral')
         # ax.ticklabel_format(axis='both', style='sci', scilimits=(-2, 2), useMathText=True)
@@ -175,8 +157,6 @@ def plot_projection(dataset_small, dataset, dataset_noisy_small, dataset_noisy, 
         for format in ('.pdf', '.png', '.svg'):
             fig_single.savefig(os.path.join(output_dir, title + format))
 
-        plt.close(fig_single)
-
     axes[1, 0].set_xlabel(r'$\Tilde{x}$')
     axes[1, 1].set_xlabel(r'$\Tilde{x}$')
     axes[0, 0].set_ylabel(r'$\Tilde{y}$')
@@ -188,9 +168,6 @@ def plot_projection(dataset_small, dataset, dataset_noisy_small, dataset_noisy, 
     fig.tight_layout()
     for format in ('pdf', 'png', 'svg'):
         fig.savefig(os.path.join(output_dir, 'global.' + format))
-
-
-    return fig, axes
 
 
 def plot_history(history, output_dir, log_scale=False):
@@ -212,3 +189,53 @@ def plot_history(history, output_dir, log_scale=False):
         ax.set_xlabel('Epoch')
         ax.legend()
         fig.savefig(os.path.join(output_dir, key + '.png'))
+
+
+
+# Helper function to compute class centroids in latent space
+def compute_centroids(X_red, y, n_classes=6):
+    centroids = [np.mean(X_red[y == i], axis=0) for i in range(n_classes)]
+
+    return np.array(centroids)
+
+# Helper function to interpolate between two centroids
+def interpolate(x1, x2, n_interpolations=4):
+    alphas = np.linspace(0, 1, n_interpolations)
+    interpolations = [(1 - alpha) * x1 + alpha * x2 for alpha in alphas]
+    
+    return interpolations
+
+
+def interpolate_images(X_red, y, autoencoder, n_classes, class_pairs, n_interpolations):
+    centroids = compute_centroids(X_red, y, n_classes)
+    for class1, class2 in class_pairs:
+        centroid1 = centroids[class1]
+        centroid2 = centroids[class2]
+        interpolations = interpolate(centroid1, centroid2, n_interpolations)
+        decoded_images = [autoencoder.decode(np.expand_dims(interp, axis=0)).numpy().reshape(28, 28) for interp in interpolations]
+
+    return interpolated_images
+
+
+# Function to generate and plot interpolations between two classes
+def plot_interpolations(datasets, titles, autoencoders, output_dir, n_classes=6, n_interpolations=4):
+    os.makedirs(output_dir, exist_ok=True)
+    class_pairs = [(i, i+1) for i in range(0, n_classes, 2)]
+    figsize = (6, 6)
+    # Create a main figure
+    fig = plt.figure(constrained_layout=True, figsize=figsize)
+    # Create two subfigures for clean and noisy images
+    subfigs = fig.subfigures(2, 2, hspace=0.1, wspace=0)
+    for (X_red, y), title, autoencoder, subfig in zip(datasets, titles, autoencoders, subfig):
+        axes = subfig.subplots(grid_shape[0], grid_shape[1], gridspec_kw={'wspace': 0, 'hspace': 0})
+        subfig.suptitle(title)
+        axes = plot_images(axes, X, y)
+
+        fig_single, axes_single = plt.subplots(
+            grid_shape[0], grid_shape[1], figsize=(figsize[0]/2, figsize[1]/2)
+        )
+        axes_single = plot_images(axes_single, X, y)
+
+    # fig.tight_layout()
+    for format in ('.pdf', '.png', '.svg'):
+        fig.savefig(os.path.join(output_dir, 'global' + format))
