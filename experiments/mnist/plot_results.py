@@ -191,9 +191,9 @@ def plot_history(history, output_dir, log_scale=False):
         fig.savefig(os.path.join(output_dir, key + '.png'))
 
 
-
 # Helper function to compute class centroids in latent space
-def compute_centroids(X_red, y, n_classes=6):
+def compute_centroids(X_red, y):
+    n_classes = len(np.unique(y))
     centroids = [np.mean(X_red[y == i], axis=0) for i in range(n_classes)]
 
     return np.array(centroids)
@@ -203,38 +203,58 @@ def interpolate(x1, x2, n_interpolations=4):
     alphas = np.linspace(0, 1, n_interpolations)
     interpolations = [(1 - alpha) * x1 + alpha * x2 for alpha in alphas]
     
-    return interpolations
+    return np.array(interpolations)
 
 
-def interpolate_images(X_red, y, autoencoder, n_classes, class_pairs, n_interpolations):
-    centroids = compute_centroids(X_red, y, n_classes)
+def interpolate_images(X_red, y, autoencoder, class_pairs, n_interpolations, image_shape):
+    centroids = compute_centroids(X_red, y)
+    interpolated_images = []
     for class1, class2 in class_pairs:
         centroid1 = centroids[class1]
         centroid2 = centroids[class2]
         interpolations = interpolate(centroid1, centroid2, n_interpolations)
-        decoded_images = [autoencoder.decode(np.expand_dims(interp, axis=0)).numpy().reshape(28, 28) for interp in interpolations]
+        interpolated_images.append(
+            autoencoder.decode(interpolations).numpy().reshape(-1, *image_shape)
+        )
+
+    interpolated_images = np.stack(interpolated_images, axis=0)
 
     return interpolated_images
 
 
 # Function to generate and plot interpolations between two classes
-def plot_interpolations(datasets, titles, autoencoders, output_dir, n_classes=6, n_interpolations=4):
+def plot_interpolations(
+    datasets,
+    titles,
+    autoencoders,
+    output_dir,
+    image_shape,
+    class_pairs = [(i, i+1) for i in range(0, 6, 2)],
+    n_interpolations=4
+):
     os.makedirs(output_dir, exist_ok=True)
-    class_pairs = [(i, i+1) for i in range(0, n_classes, 2)]
     figsize = (6, 6)
+    grid_shape = (len(class_pairs), n_interpolations)
     # Create a main figure
     fig = plt.figure(constrained_layout=True, figsize=figsize)
     # Create two subfigures for clean and noisy images
     subfigs = fig.subfigures(2, 2, hspace=0.1, wspace=0)
-    for (X_red, y), title, autoencoder, subfig in zip(datasets, titles, autoencoders, subfig):
+    for (X_red, y), title, autoencoder, subfig in zip(datasets, titles, autoencoders, subfigs):
+        interpolated_images = interpolate_images(
+            X_red, y, autoencoder, class_pairs, n_interpolations, image_shape
+        )
         axes = subfig.subplots(grid_shape[0], grid_shape[1], gridspec_kw={'wspace': 0, 'hspace': 0})
         subfig.suptitle(title)
-        axes = plot_images(axes, X, y)
+        axes = plot_images(axes, interpolated_images)
 
         fig_single, axes_single = plt.subplots(
             grid_shape[0], grid_shape[1], figsize=(figsize[0]/2, figsize[1]/2)
         )
-        axes_single = plot_images(axes_single, X, y)
+        axes_single = plot_images(axes_single, interpolated_images)
+
+        fig_single.tight_layout()
+        for format in ('.pdf', '.png', '.svg'):
+                fig_single.savefig(os.path.join(output_dir, title + format))
 
     # fig.tight_layout()
     for format in ('.pdf', '.png', '.svg'):

@@ -83,7 +83,15 @@ plot_reconstruction(
     grid_shape=(3, 4)
 )
 
-plot_interpolations(*datasets_test_red, autoencoders)
+plot_interpolations(
+    datasets_test_red,
+    titles,
+    autoencoders,
+    'experiments/mnist/results/test_interp',
+    (28, 28),
+    class_pairs = [(i, i+1) for i in range(0, 6, 2)],
+    n_interpolations=4
+)
 
 for name in ('clean-few', 'clean-many', 'noisy-few', 'noisy-many'):
     plot_history(history, 'experiments/mnist/results/histories/' + name, log_scale=True)
