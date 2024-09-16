@@ -2,13 +2,20 @@ from Autoencoder import Autoencoder
 from experiments.helix.plot_results import plot_original, plot_projection, plot_history
 from experiments.helix.load_data import get_datasets
 from experiments.utils import build_encoder, build_decoder
+from experiments.helix.metrics import compute_metrics
 
 
-datasets_train, datasets_test = get_datasets(npoints=2000, test_size=0.5, seed=123, noise=0.5)
+titles = [
+    'Few samples without noise',
+    'Many samples without noise',
+    'Few samples with noise',
+    'Many samples with noise'
+]
+datasets_train, datasets_test = get_datasets(npoints=2000, test_size=0.5, seed=123, noise=0.1)
 
 # Plot datasets
-plot_original(*datasets_train, 'experiments/helix/results/train_orig')
-plot_original(*datasets_test, 'experiments/helix/results/test_orig')
+plot_original(datasets_train, titles, 'experiments/helix/results/train_orig')
+plot_original(datasets_test, titles, 'experiments/helix/results/test_orig')
 
 datasets_train_red = []
 datasets_test_red = []
@@ -33,10 +40,18 @@ for (X_train, y_train), (X_test, y_test) in zip(datasets_train, datasets_test):
     datasets_train_rec.append((X_train_rec, y_train))
     datasets_test_rec.append((X_test_rec, y_test))
 
-plot_projection(*datasets_train_red, 'experiments/helix/results/train_red')
-plot_original(*datasets_train_rec, 'experiments/helix/results/train_rec')
-plot_projection(*datasets_test_red, 'experiments/helix/results/test_red')
-plot_original(*datasets_test_rec, 'experiments/helix/results/test_rec')
+plot_projection(datasets_train_red, titles, 'experiments/helix/results/train_red')
+plot_original(datasets_train_rec, titles, 'experiments/helix/results/train_rec')
+plot_projection(datasets_test_red, titles, 'experiments/helix/results/test_red')
+plot_original(datasets_test_rec, titles, 'experiments/helix/results/test_rec')
 
-for name in ('clean-few', 'clean-many', 'noisy-few', 'noisy-many'):
+for name in titles:
     plot_history(history, 'experiments/helix/results/histories/' + name, log_scale=True)
+
+
+compute_metrics(
+    datasets_test,
+    datasets_test_rec,
+    titles,
+    'experiments/helix/results'
+)

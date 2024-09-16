@@ -1,23 +1,8 @@
 import os
 import numpy as np
-import matplotlib as mpl
 from matplotlib import pyplot as plt
 
-# Define custom style
-plt.style.use('default')  # Reset to default style
-mpl.rcParams.update({
-    # Use serif fonts
-    'font.family': 'serif',
-    'font.serif': ['Times New Roman'],  # Specify a specific serif font
-    'font.size': 15,
-    'axes.titlesize': 'medium',
-    'axes.labelsize': 'medium',
-    'mathtext.fontset': 'dejavuserif',
-
-    # Use LaTeX for math formatting
-    'text.usetex': True,
-    'text.latex.preamble': r'\usepackage{amsmath} \usepackage{amssymb}',
-})
+plt.style.use('experiments/science.mplstyle')
 
 
 def my_colormap1D(x):
@@ -29,19 +14,12 @@ def my_colormap1D(x):
     return color
 
 
-def plot_original(dataset_small, dataset, dataset_noisy_small, dataset_noisy, output_dir):
+def plot_original(datasets, titles, output_dir):
     os.makedirs(output_dir, exist_ok=True)
 
     figsize = (6, 6)
     fig, axes = plt.subplots(2, 2, figsize=figsize, subplot_kw={"projection": "3d"})
-
-    datasets = [dataset_small, dataset, dataset_noisy_small, dataset_noisy]
-    titles = [
-        'Few samples without noise',
-        'Many samples without noise',
-        'Few samples with noise',
-        'Many samples with noise'
-    ]
+    
     for ax, (data, label), title in zip(axes.flatten(), datasets, titles):
         scatter = ax.scatter(data[:, 0], data[:, 1], data[:, 2], c=label, alpha=1)
         ax.set_title(title)
@@ -77,19 +55,11 @@ def plot_original(dataset_small, dataset, dataset_noisy_small, dataset_noisy, ou
     plt.close(fig)
 
 
-def plot_projection(dataset_small, dataset, dataset_noisy_small, dataset_noisy, output_dir):
+def plot_projection(datasets, titles, output_dir):
     os.makedirs(output_dir, exist_ok=True)
 
     figsize = (6, 6)
     fig, axes = plt.subplots(2, 2, figsize=figsize, constrained_layout=True)
-
-    datasets = [dataset_small, dataset, dataset_noisy_small, dataset_noisy]
-    titles = [
-        'Few samples without noise',
-        'Many samples without noise',
-        'Few samples with noise',
-        'Many samples with noise'
-    ]
 
     for ax, (data, label), title in zip(axes.flatten(), datasets, titles):
         ax.scatter(data[:, 0], data[:, 1], c=label)
@@ -115,7 +85,7 @@ def plot_projection(dataset_small, dataset, dataset_noisy_small, dataset_noisy, 
     axes[1, 1].set_xlabel(r'$\Tilde{x}$')
     axes[0, 0].set_ylabel(r'$\Tilde{y}$')
     axes[1, 0].set_ylabel(r'$\Tilde{y}$')
-    
+
     for format in ('pdf', 'png', 'svg'):
         fig.savefig(os.path.join(output_dir, 'global.' + format))
     
@@ -137,10 +107,10 @@ def plot_history(history, output_dir, log_scale=False):
             ax.plot(y[0], label='Training')
             ax.plot(y[1], label='Validation')
 
-        ax.set_ylabel(key)
+        ax.set_ylabel(key.capitalize())
         ax.set_xlabel('Epoch')
         ax.legend()
-        for format in ('pdf', 'png', 'svg'):
+        for format in ('.pdf', '.png', '.svg'):
             fig.savefig(os.path.join(output_dir, key + format))
         
         plt.close(fig)
