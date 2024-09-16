@@ -11,10 +11,10 @@ def normalize(x):
 def get_data(npoints=2000, test_size=0.5, seed=123, noise=0):
     np.random.seed(seed)
     theta = np.linspace(0, 2*np.pi, npoints)
-    eps = np.random.normal(loc=0, scale=noise, size=npoints)
-    x1 = np.cos(theta) + eps
-    x2 = np.sin(2*theta) + eps
-    x3 = np.sin(3*theta) + eps
+    eps = np.random.normal(loc=0, scale=noise, size=(3, npoints))
+    x1 = np.cos(theta) + eps[0]
+    x2 = np.sin(2*theta) + eps[1]
+    x3 = np.sin(3*theta) + eps[2]
     
     X = np.stack((x1, x2, x3), axis=1)
     # TODO: another option is to reparametrize the curve using its natural parameter (curve length)
