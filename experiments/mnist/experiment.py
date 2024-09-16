@@ -96,4 +96,11 @@ plot_interpolations(
 for name in ('clean-few', 'clean-many', 'noisy-few', 'noisy-many'):
     plot_history(history, 'experiments/mnist/results/histories/' + name, log_scale=True)
 
-compute_metrics(datasets_test_red, titles, 'experiments/mnist/results', n_classes=6)
+compute_metrics(
+    datasets_test,
+    datasets_test_red,
+    datasets_test_rec,
+    titles,
+    'experiments/mnist/results',
+    n_classes=6
+)

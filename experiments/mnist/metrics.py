@@ -38,14 +38,18 @@ def clustering_accuracy(y_true, y_pred):
 
 
 def compute_metrics(
-    datasets,
+    datasets_orig,
+    datasets_red,
+    datasets_rec,
     titles,
     output_dir,
     n_classes
 ):
-    results = {'title': [], 'purity': [], 'accuracy': []}
-    
-    for title, (X_red, y) in zip(titles, datasets):
+    results = {'title': [], 'purity': [], 'accuracy': [], 'rec_error': []}
+    for i in range(len(datasets_orig)):
+        X_orig, _ = datasets_orig[i]
+        X_red, y = datasets_red[i]
+        X_rec, _ = datasets_rec[i]
         # Initialize K-Means with n_classes clusters
         k_means = KMeans(n_clusters=n_classes)
         # Fit K-Means to the reduced data
@@ -54,10 +58,13 @@ def compute_metrics(
         clusters_purity = purity_score(y, clusters)
         # Calculate the accuracy of the resulting clusters
         clusters_accuracy = clustering_accuracy(y, clusters)
+        # Reconstruction error
+        rec_error = np.linalg.norm((X_orig - X_rec).flatten())
 
-        results['title'].append(title)
+        results['title'].append(titles[i])
         results['purity'].append(clusters_purity)
         results['accuracy'].append(clusters_accuracy)
+        results['rec_error'].append(rec_error)
     
     # Save the results to a .txt file
     df = pd.DataFrame(results)
