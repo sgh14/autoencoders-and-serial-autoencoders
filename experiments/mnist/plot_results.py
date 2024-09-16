@@ -64,13 +64,15 @@ def plot_grids(
         axes = plot_images(axes, X, y)
 
         fig_single, axes_single = plt.subplots(
-            grid_shape[0], grid_shape[1], figsize=figsize
+            grid_shape[0], grid_shape[1], figsize=figsize, gridspec_kw={'wspace': 0.2, 'hspace': 0.2}
         )
         axes_single = plot_images(axes_single, X, y)
 
         fig_single.tight_layout()
         for format in ('.pdf', '.png', '.svg'):
                 fig_single.savefig(os.path.join(output_dir, title + format))
+        
+        plt.close(fig_single)
 
     
     return subfigs
@@ -89,9 +91,9 @@ def plot_original(
     # Create a main figure
     fig = plt.figure(constrained_layout=True, figsize=figsize)
     # Create two subfigures for clean and noisy images
-    subfigs = fig.subfigures(2, 1, hspace=0.1, wspace=0)
+    subfigs = fig.subfigures(2, 1, hspace=0.05, wspace=0)
     subfigs = plot_grids(
-        subfigs,
+        subfigs.ravel(),
         datasets,
         titles,
         output_dir,
@@ -104,6 +106,8 @@ def plot_original(
     # fig.tight_layout()
     for format in ('.pdf', '.png', '.svg'):
         fig.savefig(os.path.join(output_dir, 'global' + format))
+    
+    plt.close(fig)
 
 
 def plot_reconstruction(
@@ -119,9 +123,9 @@ def plot_reconstruction(
     # Create a main figure
     fig = plt.figure(constrained_layout=True, figsize=figsize)
     # Create two subfigures for clean and noisy images
-    subfigs = fig.subfigures(2, 2, hspace=0.1, wspace=0)
+    subfigs = fig.subfigures(2, 2, hspace=0.05, wspace=0.1)
     subfigs = plot_grids(
-        subfigs,
+        subfigs.ravel(),
         datasets,
         titles,
         output_dir,
@@ -135,39 +139,49 @@ def plot_reconstruction(
     for format in ('.pdf', '.png', '.svg'):
         fig.savefig(os.path.join(output_dir, 'global' + format))
 
+    plt.close(fig)
+
 
 def plot_projection(datasets, titles, output_dir):
     os.makedirs(output_dir, exist_ok=True)
 
     figsize = (6, 6)
-    fig, axes = plt.subplots(2, 2, figsize=figsize)
+    fig, axes = plt.subplots(2, 2, figsize=figsize, constrained_layout=True)
     for ax, (X, y), title in zip(axes.flatten(), datasets, titles):
         ax.scatter(X[:, 0], X[:, 1], c=y, cmap='Spectral')
         # ax.ticklabel_format(axis='both', style='sci', scilimits=(-2, 2), useMathText=True)
         ax.set_title(title)
+        # Set box aspect ratio instead of axis aspect to ensure square subplots
+        ax.set_box_aspect(1)
 
         # Create a new figure for each subplot
         fig_single, ax_single = plt.subplots(figsize=(figsize[0]/2, figsize[1]/2))
         ax_single.scatter(X[:, 0], X[:, 1], c=y, cmap='Spectral')
-        ax_single.set_aspect('equal')
         ax_single.set_xlabel(r'$\Tilde{x}$')
         ax_single.set_ylabel(r'$\Tilde{y}$')
+        # Set box aspect ratio instead of axis aspect to ensure square subplots
+        ax_single.set_box_aspect(1)
+        # ax_single.set_aspect('equal')
         fig_single.tight_layout()
 
         for format in ('.pdf', '.png', '.svg'):
             fig_single.savefig(os.path.join(output_dir, title + format))
+        
+        plt.close(fig_single)
 
     axes[1, 0].set_xlabel(r'$\Tilde{x}$')
     axes[1, 1].set_xlabel(r'$\Tilde{x}$')
     axes[0, 0].set_ylabel(r'$\Tilde{y}$')
     axes[1, 0].set_ylabel(r'$\Tilde{y}$')
-    # Set all axes to be square
-    for ax in axes.flatten():
-        ax.set_aspect('equal')
+    # # Set all axes to be square
+    # for ax in axes.flatten():
+    #     ax.set_aspect('equal')
 
-    fig.tight_layout()
+    # fig.tight_layout()
     for format in ('pdf', 'png', 'svg'):
         fig.savefig(os.path.join(output_dir, 'global.' + format))
+    
+    plt.close(fig)
 
 
 def plot_history(history, output_dir, log_scale=False):
@@ -188,7 +202,10 @@ def plot_history(history, output_dir, log_scale=False):
         ax.set_ylabel(key)
         ax.set_xlabel('Epoch')
         ax.legend()
-        fig.savefig(os.path.join(output_dir, key + '.png'))
+        for format in ('.pdf', '.png', '.svg'):
+            fig.savefig(os.path.join(output_dir, key + format))
+        
+        plt.close(fig)
 
 
 # Helper function to compute class centroids in latent space
@@ -217,7 +234,7 @@ def interpolate_images(X_red, y, autoencoder, class_pairs, n_interpolations, ima
             autoencoder.decode(interpolations).numpy().reshape(-1, *image_shape)
         )
 
-    interpolated_images = np.stack(interpolated_images, axis=0)
+    interpolated_images = np.vstack(interpolated_images)
 
     return interpolated_images
 
@@ -238,7 +255,7 @@ def plot_interpolations(
     # Create a main figure
     fig = plt.figure(constrained_layout=True, figsize=figsize)
     # Create two subfigures for clean and noisy images
-    subfigs = fig.subfigures(2, 2, hspace=0.1, wspace=0)
+    subfigs = fig.subfigures(2, 2, hspace=0.05, wspace=0.1).ravel()
     for (X_red, y), title, autoencoder, subfig in zip(datasets, titles, autoencoders, subfigs):
         interpolated_images = interpolate_images(
             X_red, y, autoencoder, class_pairs, n_interpolations, image_shape
@@ -248,14 +265,18 @@ def plot_interpolations(
         axes = plot_images(axes, interpolated_images)
 
         fig_single, axes_single = plt.subplots(
-            grid_shape[0], grid_shape[1], figsize=(figsize[0]/2, figsize[1]/2)
+            grid_shape[0], grid_shape[1], figsize=(figsize[0]/2, figsize[1]/2), gridspec_kw={'wspace': 0.2, 'hspace': 0}
         )
         axes_single = plot_images(axes_single, interpolated_images)
 
-        fig_single.tight_layout()
+        # fig_single.tight_layout()
         for format in ('.pdf', '.png', '.svg'):
                 fig_single.savefig(os.path.join(output_dir, title + format))
+        
+        plt.close(fig_single)
 
     # fig.tight_layout()
     for format in ('.pdf', '.png', '.svg'):
         fig.savefig(os.path.join(output_dir, 'global' + format))
+    
+    plt.close(fig)
