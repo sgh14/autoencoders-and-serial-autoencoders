@@ -67,17 +67,21 @@ def plot_original(dataset_small, dataset, dataset_noisy_small, dataset_noisy, ou
 
         for format in ('.pdf', '.png', '.svg'):
             fig_single.savefig(os.path.join(output_dir, title + format))
+        
+        plt.close(fig_single)
 
     fig.tight_layout()
     for format in ('.pdf', '.png', '.svg'):
         fig.savefig(os.path.join(output_dir, 'global' + format))
+    
+    plt.close(fig)
 
 
 def plot_projection(dataset_small, dataset, dataset_noisy_small, dataset_noisy, output_dir):
     os.makedirs(output_dir, exist_ok=True)
 
     figsize = (6, 6)
-    fig, axes = plt.subplots(2, 2, figsize=figsize)
+    fig, axes = plt.subplots(2, 2, figsize=figsize, constrained_layout=True)
 
     datasets = [dataset_small, dataset, dataset_noisy_small, dataset_noisy]
     titles = [
@@ -88,9 +92,10 @@ def plot_projection(dataset_small, dataset, dataset_noisy_small, dataset_noisy, 
     ]
 
     for ax, (data, label), title in zip(axes.flatten(), datasets, titles):
-        scatter = ax.scatter(data[:, 0], data[:, 1], c=label)
+        ax.scatter(data[:, 0], data[:, 1], c=label)
         # ax.ticklabel_format(axis='both', style='sci', scilimits=(-2, 2), useMathText=True)
         ax.set_title(title)
+        ax.set_box_aspect(1)
 
         # Create a new figure for each subplot
         fig_single, ax_single = plt.subplots(figsize=(figsize[0]/2, figsize[1]/2))
@@ -98,22 +103,23 @@ def plot_projection(dataset_small, dataset, dataset_noisy_small, dataset_noisy, 
         ax_single.set_aspect('equal')
         ax_single.set_xlabel(r'$\Tilde{x}$')
         ax_single.set_ylabel(r'$\Tilde{y}$')
+        ax_single.set_box_aspect(1)
         fig_single.tight_layout()
 
         for format in ('.pdf', '.png', '.svg'):
             fig_single.savefig(os.path.join(output_dir, title + format))
+        
+        plt.close(fig_single)
 
     axes[1, 0].set_xlabel(r'$\Tilde{x}$')
     axes[1, 1].set_xlabel(r'$\Tilde{x}$')
     axes[0, 0].set_ylabel(r'$\Tilde{y}$')
     axes[1, 0].set_ylabel(r'$\Tilde{y}$')
-    # Set all axes to be square
-    for ax in axes.flatten():
-        ax.set_aspect('equal')
-
-    fig.tight_layout()
+    
     for format in ('pdf', 'png', 'svg'):
         fig.savefig(os.path.join(output_dir, 'global.' + format))
+    
+    plt.close(fig)
 
 
 def plot_history(history, output_dir, log_scale=False):
@@ -134,4 +140,7 @@ def plot_history(history, output_dir, log_scale=False):
         ax.set_ylabel(key)
         ax.set_xlabel('Epoch')
         ax.legend()
-        fig.savefig(os.path.join(output_dir, key + '.png'))
+        for format in ('pdf', 'png', 'svg'):
+            fig.savefig(os.path.join(output_dir, key + format))
+        
+        plt.close(fig)
