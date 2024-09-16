@@ -1,13 +1,9 @@
 import os
 import numpy as np
 from matplotlib import pyplot as plt
-from matplotlib.colors import ListedColormap
 
 plt.style.use('experiments/science.mplstyle')
-# Define your color cycle manually as a list
 colors = ['#0C5DA5', '#00B945', '#FF9500', '#FF2C00', '#845B97', '#474747', '#9e9e9e']
-# Create a colormap from your color cycle
-cmap = ListedColormap(colors)
 
 
 # Function to sample 2 images per class from the dataset
@@ -174,7 +170,6 @@ def plot_projection(datasets, titles, output_dir):
     # Add the legend below the plot, with ncol=number of unique y values for one-row legend
     fig.legend(handles, labels, loc='lower center', ncol=len(unique_y), bbox_to_anchor=(0.5, -0.05))
 
-
     for format in ('pdf', 'png', 'svg'):
         fig.savefig(os.path.join(output_dir, 'global.' + format))
     
@@ -196,7 +191,7 @@ def plot_history(history, output_dir, log_scale=False):
             ax.plot(y[0], label='Training')
             ax.plot(y[1], label='Validation')
 
-        ax.set_ylabel(key)
+        ax.set_ylabel(key.capitalize())
         ax.set_xlabel('Epoch')
         ax.legend()
         for format in ('.pdf', '.png', '.svg'):

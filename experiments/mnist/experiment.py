@@ -46,7 +46,7 @@ for (X_train, y_train), (X_test, y_test) in zip(datasets_train, datasets_test):
     decoder = build_decoder(output_shape=(X_train.shape[-1],), units=128, n_components=2)
     autoencoder = Autoencoder(encoder, decoder)
     autoencoder.compile(optimizer='adam', loss='mse')
-    history = autoencoder.fit(X_train, epochs=3, validation_split=0.1, shuffle=True, batch_size=64, verbose=0)
+    history = autoencoder.fit(X_train, epochs=250, validation_split=0.1, shuffle=True, batch_size=64, verbose=0)
 
     X_train_red = autoencoder.encode(X_train)
     X_test_red = autoencoder.encode(X_test)
@@ -93,7 +93,7 @@ plot_interpolations(
     n_interpolations=4
 )
 
-for name in ('clean-few', 'clean-many', 'noisy-few', 'noisy-many'):
+for name in titles:
     plot_history(history, 'experiments/mnist/results/histories/' + name, log_scale=True)
 
 compute_metrics(
