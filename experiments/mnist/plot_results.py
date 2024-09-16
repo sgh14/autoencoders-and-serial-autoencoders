@@ -1,23 +1,13 @@
 import os
 import numpy as np
-import matplotlib as mpl
 from matplotlib import pyplot as plt
+from matplotlib.colors import ListedColormap
 
-# Define custom style
-plt.style.use('default')  # Reset to default style
-mpl.rcParams.update({
-    # Use serif fonts
-    'font.family': 'serif',
-    'font.serif': ['Times New Roman'],  # Specify a specific serif font
-    'font.size': 15,
-    'axes.titlesize': 'medium',
-    'axes.labelsize': 'medium',
-    'mathtext.fontset': 'dejavuserif',
-
-    # Use LaTeX for math formatting
-    'text.usetex': True,
-    'text.latex.preamble': r'\usepackage{amsmath} \usepackage{amssymb}',
-})
+plt.style.use('experiments/science.mplstyle')
+# Define your color cycle manually as a list
+colors = ['#0C5DA5', '#00B945', '#FF9500', '#FF2C00', '#845B97', '#474747', '#9e9e9e']
+# Create a colormap from your color cycle
+cmap = ListedColormap(colors)
 
 
 # Function to sample 2 images per class from the dataset
@@ -148,7 +138,7 @@ def plot_projection(datasets, titles, output_dir):
     figsize = (6, 6)
     fig, axes = plt.subplots(2, 2, figsize=figsize, constrained_layout=True)
     for ax, (X, y), title in zip(axes.flatten(), datasets, titles):
-        ax.scatter(X[:, 0], X[:, 1], c=y, cmap='Spectral')
+        ax.scatter(X[:, 0], X[:, 1], c=[colors[i] for i in y])#y, cmap=cmap)
         # ax.ticklabel_format(axis='both', style='sci', scilimits=(-2, 2), useMathText=True)
         ax.set_title(title)
         # Set box aspect ratio instead of axis aspect to ensure square subplots
@@ -156,13 +146,20 @@ def plot_projection(datasets, titles, output_dir):
 
         # Create a new figure for each subplot
         fig_single, ax_single = plt.subplots(figsize=(figsize[0]/2, figsize[1]/2))
-        ax_single.scatter(X[:, 0], X[:, 1], c=y, cmap='Spectral')
+        ax_single.scatter(X[:, 0], X[:, 1], c=[colors[i] for i in y])#y, cmap=cmap)
         ax_single.set_xlabel(r'$\Tilde{x}$')
         ax_single.set_ylabel(r'$\Tilde{y}$')
         # Set box aspect ratio instead of axis aspect to ensure square subplots
         ax_single.set_box_aspect(1)
-        # ax_single.set_aspect('equal')
         fig_single.tight_layout()
+
+        # Create a list of handles and labels for the legend
+        unique_y = np.unique(y)
+        handles = [plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=colors[val], markersize=10) for val in unique_y]
+        labels = [str(val) for val in unique_y]  # Adjust labels based on your case
+
+        # Add the legend below the plot, with ncol=number of unique y values for one-row legend
+        fig_single.legend(handles, labels, loc='lower center', ncol=len(unique_y)//2, bbox_to_anchor=(0.5, -0.1))
 
         for format in ('.pdf', '.png', '.svg'):
             fig_single.savefig(os.path.join(output_dir, title + format))
@@ -173,11 +170,11 @@ def plot_projection(datasets, titles, output_dir):
     axes[1, 1].set_xlabel(r'$\Tilde{x}$')
     axes[0, 0].set_ylabel(r'$\Tilde{y}$')
     axes[1, 0].set_ylabel(r'$\Tilde{y}$')
-    # # Set all axes to be square
-    # for ax in axes.flatten():
-    #     ax.set_aspect('equal')
 
-    # fig.tight_layout()
+    # Add the legend below the plot, with ncol=number of unique y values for one-row legend
+    fig.legend(handles, labels, loc='lower center', ncol=len(unique_y), bbox_to_anchor=(0.5, -0.05))
+
+
     for format in ('pdf', 'png', 'svg'):
         fig.savefig(os.path.join(output_dir, 'global.' + format))
     
