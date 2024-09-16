@@ -38,15 +38,11 @@ def clustering_accuracy(y_true, y_pred):
 
 
 def compute_metrics(
-    dataset_small,
-    dataset,
-    dataset_noisy_small,
-    dataset_noisy,
+    datasets,
+    titles,
     output_dir,
     n_classes
 ):
-    datasets = [dataset_small, dataset, dataset_noisy_small, dataset_noisy]
-    titles = ['few-clean', 'many-clean', 'few-noisy', 'many-noisy']
     results = {'title': [], 'purity': [], 'accuracy': []}
     
     for title, (X_red, y) in zip(titles, datasets):
