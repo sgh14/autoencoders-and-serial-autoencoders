@@ -10,7 +10,7 @@ class Autoencoder:
     which can be used for dimensionality reduction and feature learning.
     """
 
-    def __init__(self, encoder, decoder):
+    def __init__(self, encoder, decoder, name='autoencoder'):
         """
         Initialize the Autoencoder.
 
@@ -20,12 +20,10 @@ class Autoencoder:
         """
         # Set up the encoder
         self.encoder = encoder
-        self.encoder.name = 'encoder'
         self.encoder.summary()
         
         # Set up the decoder
         self.decoder = decoder
-        self.decoder.name = 'decoder'
         self.decoder.summary()
 
         # Construct the full autoencoder by combining encoder and decoder
@@ -33,7 +31,7 @@ class Autoencoder:
             Input(shape=self.encoder.input_shape[1:]),  # Input layer matching encoder's input shape
             self.encoder,
             self.decoder
-        ], name='autoencoder')
+        ], name=name)
 
         self.autoencoder.summary()
 
