@@ -43,8 +43,8 @@ for (X_train, y_train), (X_test, y_test), title in zip(datasets_train, datasets_
     X_train_rec = autoencoder.decode(X_train_red)
     X_test_rec = autoencoder.decode(X_test_red)
     
-    X_train_rec = X_train_rec.numpy().reshape((X_train_rec.shape[0], 28, 28))
-    X_test_rec = X_test_rec.numpy().reshape((X_test_rec.shape[0], 28, 28))
+    X_train_rec = X_train_rec.numpy().reshape((X_train_rec.shape[0], *img_shape))
+    X_test_rec = X_test_rec.numpy().reshape((X_test_rec.shape[0], *img_shape))
 
     plot_projection(X_train_red, y_train, title, path.join(root, 'train_red'))
     plot_original(
