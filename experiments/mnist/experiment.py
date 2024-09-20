@@ -1,7 +1,7 @@
 from os import path
 
 from Autoencoder import Autoencoder
-from experiments.mnist.plot_results import plot_original, plot_reconstruction, plot_projection, plot_interpolations, plot_history
+from experiments.mnist.plot_results import plot_original, plot_projection, plot_interpolations, plot_history
 from experiments.mnist.load_data import get_datasets
 from experiments.mnist.metrics import compute_metrics
 from experiments.utils import build_encoder, build_decoder
