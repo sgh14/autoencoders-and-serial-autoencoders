@@ -72,7 +72,7 @@ for (X_train, y_train), (X_test, y_test), title in zip(datasets_train, datasets_
         autoencoder.decoder,
         path.join(root, title),
         'train_interp',
-        class_pairs = [(i, i+1) for i in range(0, 6, 2)],
+        class_pairs = [(i, i+1) for i in range(0, 5)],
         n_interpolations=6
     )
     plot_interpolations(
