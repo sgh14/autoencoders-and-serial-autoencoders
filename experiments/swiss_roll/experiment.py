@@ -17,7 +17,7 @@ titles = [
     'Few samples with noise',
     'Many samples with noise'
 ]
-datasets_train, datasets_test = get_datasets(npoints=2000, test_size=0.5, seed=seed, noise=0.75)
+datasets_train, datasets_test = get_datasets(npoints=2000, test_size=0.5, seed=seed, noise=0.5)
 
 for (X_train, y_train), (X_test, y_test), title in zip(datasets_train, datasets_test, titles):
     encoder = build_encoder(input_shape=(X_train.shape[-1],), units=128, n_components=2)
