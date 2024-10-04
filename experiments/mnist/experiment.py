@@ -27,8 +27,8 @@ for (X_train, y_train), (X_test, y_test), title in zip(datasets_train, datasets_
     X_train = np.expand_dims(X_train, axis=-1)
     X_test = np.expand_dims(X_test, axis=-1)
 
-    encoder = build_conv_encoder(input_shape=X_train.shape[1:], filters=8, n_components=2, zero_padding=(2, 2))
-    decoder = build_conv_decoder(output_shape=X_train.shape[1:], filters=8, n_components=2, cropping=(2, 2))
+    encoder = build_conv_encoder(input_shape=X_train.shape[1:], filters=8, n_components=2, zero_padding=(2, 2), dropout=0.2)
+    decoder = build_conv_decoder(output_shape=X_train.shape[1:], filters=8, n_components=2, cropping=(2, 2), dropout=0.2)
     autoencoder = Autoencoder(encoder, decoder)
     tic = time.perf_counter()
     autoencoder.compile(optimizer='adam', loss='mse')
