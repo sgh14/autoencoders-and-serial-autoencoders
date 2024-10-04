@@ -27,7 +27,7 @@ for (X_train, y_train), (X_test, y_test), title in zip(datasets_train, datasets_
     autoencoder = Autoencoder(encoder, decoder)
     tic = time.perf_counter()
     autoencoder.compile(optimizer='adam', loss='mse')
-    history = autoencoder.fit(X_train, epochs=50, validation_split=0.1, shuffle=True, batch_size=64, verbose=0)
+    history = autoencoder.fit(X_train, epochs=50, validation_split=0.1, shuffle=False, batch_size=64, verbose=0)
 
     X_train_red = autoencoder.encode(X_train)
     tac = time.perf_counter()
