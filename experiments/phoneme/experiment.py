@@ -1,16 +1,24 @@
 import time
+import numpy as np
 import tensorflow as tf
+import os
+import random
 from os import path
+import h5py
 
 from Autoencoder import Autoencoder
-from experiments.phoneme.plot_results import plot_original, plot_projection, plot_history
 from experiments.phoneme.load_data import get_datasets
-from experiments.phoneme.metrics import compute_metrics
 from experiments.utils import build_seq_encoder, build_seq_decoder
 
-
+# ENSURE REPRODUCIBILITY
 seed = 123
+os.environ['PYTHONHASHSEED'] = str(seed)
+random.seed(seed)
+np.random.seed(seed)
 tf.random.set_seed(seed)
+os.environ['CUDA_VISIBLE_DEVICES'] = '-1' # force the use of CPU
+
+
 root = 'experiments/phoneme/results'
 titles = [
     'Few samples without noise',
@@ -22,6 +30,7 @@ titles = [
 datasets_train, datasets_test = get_datasets(test_size=0.2, seed=seed, noise=0.25)
 
 for (X_train, y_train), (X_test, y_test), title in zip(datasets_train, datasets_test, titles):
+    output_dir = path.join(root, title)
     encoder = build_seq_encoder(input_shape=X_train.shape[1:], filters=8, n_components=2, zero_padding=0)
     decoder = build_seq_decoder(output_shape=X_train.shape[1:], filters=8, n_components=2, cropping=0)
     autoencoder = Autoencoder(encoder, decoder)
@@ -36,29 +45,27 @@ for (X_train, y_train), (X_test, y_test), title in zip(datasets_train, datasets_
     X_train_rec = autoencoder.decode(X_train_red).numpy()
     X_test_rec = autoencoder.decode(X_test_red).numpy()
 
+    autoencoder.encoder.save(path.join(output_dir, 'encoder.h5'))
+    autoencoder.decoder.save(path.join(output_dir, 'decoder.h5'))
+    with h5py.File(path.join(output_dir, 'history.h5'), 'w') as file:
+        for key, value in history.history.items():
+            file.create_dataset(key, data=value)
+    
+    X_train = X_train.reshape(X_train.shape[0], -1)
+    X_train_rec = X_train_rec.reshape(X_train_rec.shape[0], -1)
+    X_test = X_test.reshape(X_test.shape[0], -1)
+    X_test_rec = X_test_rec.reshape(X_test_rec.shape[0], -1)
+    with h5py.File(path.join(output_dir, 'results.h5'), "w") as file:
+        file.create_dataset("X_train", data=X_train, compression='gzip')
+        file.create_dataset("X_train_red", data=X_train_red, compression='gzip')
+        file.create_dataset("X_train_rec", data=X_train_rec, compression='gzip')
+        file.create_dataset("y_train", data=y_train, compression='gzip')
+        file.create_dataset("X_test", data=X_test, compression='gzip')
+        file.create_dataset("X_test_red", data=X_test_red, compression='gzip')
+        file.create_dataset("X_test_rec", data=X_test_rec, compression='gzip')
+        file.create_dataset("y_test", data=y_test, compression='gzip')
+
     time_in_sample = tac - tic
     time_out_of_sample = toc - tac
-    
-    plot_original(X_train, y_train, path.join(root, title), 'train_orig')
-    plot_original(X_test, y_test, path.join(root, title), 'test_orig')
-    plot_projection(X_train_red, y_train, path.join(root, title), 'train_red',)
-    plot_original(X_train_rec, y_train, path.join(root, title), 'train_rec')
-    plot_projection(X_test_red, y_test, path.join(root, title), 'test_red',)
-    plot_original(X_test_rec, y_test, path.join(root, title), 'test_rec')
-    
-    plot_history(history, path.join(root, 'histories', title), log_scale=True)
-
-    compute_metrics(
-        X_train,
-        y_train,
-        X_train_red,
-        X_train_rec,
-        X_test,
-        y_test,
-        X_test_red,
-        X_test_rec,
-        time_in_sample,
-        time_out_of_sample,
-        title,
-        output_dir=path.join(root, title)
-    )
+    times = np.array([time_in_sample, time_out_of_sample])
+    np.savetxt(path.join(output_dir, 'times.txt'), times)
