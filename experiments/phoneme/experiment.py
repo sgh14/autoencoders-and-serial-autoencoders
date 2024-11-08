@@ -10,6 +10,7 @@ from Autoencoder import Autoencoder
 from experiments.phoneme.load_data import get_datasets
 from experiments.utils import build_seq_encoder, build_seq_decoder
 
+# os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 # ENSURE REPRODUCIBILITY
 seed = 123
 os.environ['PYTHONHASHSEED'] = str(seed)
@@ -30,13 +31,15 @@ titles = [
 datasets_train, datasets_test = get_datasets(test_size=0.2, seed=seed, noise=0.25)
 
 for (X_train, y_train), (X_test, y_test), title in zip(datasets_train, datasets_test, titles):
+    print(title)
     output_dir = path.join(root, title)
-    encoder = build_seq_encoder(input_shape=X_train.shape[1:], filters=8, n_components=2, zero_padding=0)
+    os.makedirs(output_dir, exist_ok=True)
+    encoder = build_seq_encoder(input_shape=X_train.shape[1:], filters=8, n_components=2, zero_padding=0, use_bn=False)
     decoder = build_seq_decoder(output_shape=X_train.shape[1:], filters=8, n_components=2, cropping=0)
     autoencoder = Autoencoder(encoder, decoder)
     tic = time.perf_counter()
     autoencoder.compile(optimizer='adam', loss='mse')
-    history = autoencoder.fit(X_train, epochs=50, validation_split=0.1, shuffle=False, batch_size=64, verbose=0)
+    history = autoencoder.fit(X_train, epochs=100, validation_split=0.1, shuffle=False, batch_size=64, verbose=0)
 
     X_train_red = autoencoder.encode(X_train)
     tac = time.perf_counter()
@@ -45,8 +48,8 @@ for (X_train, y_train), (X_test, y_test), title in zip(datasets_train, datasets_
     X_train_rec = autoencoder.decode(X_train_red).numpy()
     X_test_rec = autoencoder.decode(X_test_red).numpy()
 
-    autoencoder.encoder.save(path.join(output_dir, 'encoder.h5'))
-    autoencoder.decoder.save(path.join(output_dir, 'decoder.h5'))
+    autoencoder.encoder.save(path.join(output_dir, 'encoder.keras'))
+    autoencoder.decoder.save(path.join(output_dir, 'decoder.keras'))
     with h5py.File(path.join(output_dir, 'history.h5'), 'w') as file:
         for key, value in history.history.items():
             file.create_dataset(key, data=value)
