@@ -19,21 +19,15 @@ class Autoencoder:
             decoder (keras.Model): The decoder part of the autoencoder.
         """
         # Set up the encoder
-        self.encoder = encoder
-        self.encoder.summary()
-        
+        self.encoder = encoder 
         # Set up the decoder
         self.decoder = decoder
-        self.decoder.summary()
-
         # Construct the full autoencoder by combining encoder and decoder
         self.autoencoder = Sequential([
             Input(shape=self.encoder.input_shape[1:]),  # Input layer matching encoder's input shape
             self.encoder,
             self.decoder
         ], name=name)
-
-        self.autoencoder.summary()
 
   
     def compile(self, *args, **kwargs):
