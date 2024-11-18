@@ -38,7 +38,7 @@ for (X_train, y_train), (X_test, y_test), title in zip(datasets_train, datasets_
     decoder = build_seq_decoder(output_shape=X_train.shape[1:], filters=8, n_components=2, cropping=0)
     autoencoder = Autoencoder(encoder, decoder)
     tic = time.perf_counter()
-    autoencoder.compile(optimizer='adam', loss='mse')
+    autoencoder.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.01), loss='mse')
     history = autoencoder.fit(X_train, epochs=100, validation_split=0.1, shuffle=False, batch_size=64, verbose=0)
 
     X_train_red = autoencoder.encode(X_train)
