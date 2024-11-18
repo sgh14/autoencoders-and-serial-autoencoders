@@ -20,7 +20,7 @@ tf.random.set_seed(seed)
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1' # force the use of CPU
 
 
-root = 'experiments/phoneme/results'
+root = '/scratch/sgarcia/tfm/AE/experiments/phoneme/results'
 titles = [
     'Few samples without noise',
     'Many samples without noise',

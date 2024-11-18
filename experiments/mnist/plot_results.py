@@ -198,7 +198,7 @@ def plot_interpolations(
     plt.close(fig)
 
 
-root = 'experiments/mnist/results'
+root = '/scratch/sgarcia/tfm/AE/experiments/mnist/results'
 titles = [
     'Few samples without noise',
     'Many samples without noise',
