@@ -28,7 +28,7 @@ titles = [
     'Many samples with noise'
 ]
 
-datasets_train, datasets_test = get_datasets(npoints=10000, test_size=0.1, seed=seed, noise=0.25)
+datasets_train, datasets_test = get_datasets(npoints=5000, test_size=0.1, seed=seed, noise=0.15)
 
 for (X_train, y_train), (X_test, y_test), title in zip(datasets_train, datasets_test, titles):
     print(title)
@@ -42,8 +42,8 @@ for (X_train, y_train), (X_test, y_test), title in zip(datasets_train, datasets_
     decoder = build_conv_decoder(output_shape=X_train.shape[1:], filters=8, n_components=2, cropping=(2, 2), dropout=0.2)
     autoencoder = Autoencoder(encoder, decoder)
     tic = time.perf_counter()
-    autoencoder.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.05), loss='mse')
-    history = autoencoder.fit(X_train, epochs=100, validation_split=0.1, shuffle=False, batch_size=64, verbose=0)
+    autoencoder.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=0.001), loss='mse')
+    history = autoencoder.fit(X_train, epochs=500, validation_split=0.1, shuffle=False, batch_size=64, verbose=0)
 
     X_train_red = autoencoder.encode(X_train)
     tac = time.perf_counter()
